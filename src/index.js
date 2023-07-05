@@ -198,9 +198,10 @@ for (var i = 0; i < 6; ++i) {
 var TABS_KEYS = Object.keys(TABS);
 function Main() {
   var ref = React.useRef();
-  var initedRef = React.useRef(false);
   var sumWidthRef = React.useRef(0);
-  var _React$useState5 = React.useState(""),
+  var _React$useState5 = React.useState(function () {
+      return new URLSearchParams(location.search).get("tab") || "all";
+    }),
     _React$useState6 = (0, _slicedToArray2["default"])(_React$useState5, 2),
     activeTab = _React$useState6[0],
     setActiveTab = _React$useState6[1];
@@ -208,12 +209,6 @@ function Main() {
     _React$useState8 = (0, _slicedToArray2["default"])(_React$useState7, 2),
     hasRightScroll = _React$useState8[0],
     setHasRightScroll = _React$useState8[1];
-  React.useEffect(function () {
-    if (!activeTab && !initedRef.current) {
-      initedRef.current = true;
-      setActiveTab(new URLSearchParams(location.search).get("tab") || "all");
-    }
-  }, [activeTab]);
   var onSelectInput = function onSelectInput(event) {
     setActiveTab(event.target.value);
   };
@@ -222,13 +217,13 @@ function Main() {
     sumWidthRef.current += width;
   }, []);
   React.useEffect(function () {
-    var newHasRightScroll = sumWidthRef.current > ref.current.offsetWidth;
+    var newHasRightScroll = sumWidthRef.current > ref.current.parentElement.offsetWidth;
     if (newHasRightScroll !== hasRightScroll) {
       setHasRightScroll(newHasRightScroll);
     }
   });
   var onArrowCLick = function onArrowCLick() {
-    var scroller = ref.current.querySelector(".section__panel:not(.section__panel_hidden)");
+    var scroller = ref.current;
     if (scroller) {
       scroller.scrollTo({
         left: scroller.scrollLeft + 400,
@@ -353,26 +348,23 @@ function Main() {
       }
     }, TABS[key].title);
   }))), /*#__PURE__*/React.createElement("div", {
-    className: "section__panel-wrapper",
-    ref: ref
-  }, TABS_KEYS.map(function (key) {
-    return /*#__PURE__*/React.createElement("div", {
-      key: key,
-      role: "tabpanel",
-      className: "section__panel" + (key === activeTab ? "" : " section__panel_hidden"),
-      "aria-hidden": key === activeTab ? "false" : "true",
-      id: "panel_".concat(key),
-      "aria-labelledby": "tab_".concat(key)
-    }, /*#__PURE__*/React.createElement("ul", {
-      className: "section__panel-list"
-    }, TABS[key].items.map(function (item, index) {
-      return /*#__PURE__*/React.createElement(Event, Object.assign({
-        key: index
-      }, item, {
-        onSize: onSize
-      }));
-    })));
-  }), hasRightScroll && /*#__PURE__*/React.createElement("div", {
+    className: "section__panel-wrapper"
+  }, /*#__PURE__*/React.createElement("div", {
+    ref: ref,
+    role: "tabpanel",
+    className: "section__panel",
+    "aria-hidden": "false",
+    id: "panel_".concat(activeTab),
+    "aria-labelledby": "tab_".concat(activeTab)
+  }, /*#__PURE__*/React.createElement("ul", {
+    className: "section__panel-list"
+  }, TABS[activeTab].items.map(function (item, index) {
+    return /*#__PURE__*/React.createElement(Event, Object.assign({
+      key: index
+    }, item, {
+      onSize: onSize
+    }));
+  }))), hasRightScroll && /*#__PURE__*/React.createElement("div", {
     className: "section__arrow",
     onClick: onArrowCLick
   }))));
