@@ -67,7 +67,7 @@ function Event(props) {
                 onSize({ width: -width, height: -height });
             };
         }
-    });
+    }, [onSize]);
 
     return (
         <li ref={ref} className={"event" + (props.slim ? " event_slim" : "")}>
@@ -218,13 +218,38 @@ for (let i = 0; i < 6; ++i) {
 }
 const TABS_KEYS = Object.keys(TABS);
 
+const hasRightScrollContext = React.createContext();
+const setHasRightScrollContext = React.createContext();
+
+function RightScrollProvider({ children }) {
+    const [hasRightScroll, setHasRightScroll] = React.useState(true);
+
+    return (
+        <setHasRightScrollContext.Provider value={setHasRightScroll}>
+            <hasRightScrollContext.Provider value={hasRightScroll}>
+                {children}
+            </hasRightScrollContext.Provider>
+        </setHasRightScrollContext.Provider>
+    );
+}
+
+function RightScroll({ onArrowCLick }) {
+    const hasRightScroll = React.useContext(hasRightScrollContext);
+
+    if (!hasRightScroll) {
+        return null;
+    }
+
+    return <div className="section__arrow" onClick={onArrowCLick}></div>;
+}
+
 function Main() {
     const ref = React.useRef();
     const sumWidthRef = React.useRef(0);
+    const setHasRightScroll = React.useContext(setHasRightScrollContext);
     const [activeTab, setActiveTab] = React.useState(
         () => new URLSearchParams(location.search).get("tab") || "all"
     );
-    const [hasRightScroll, setHasRightScroll] = React.useState(false);
 
     const onSelectInput = (event) => {
         setActiveTab(event.target.value);
@@ -232,16 +257,13 @@ function Main() {
 
     const onSize = React.useCallback(({ width }) => {
         sumWidthRef.current += width;
+
+        const newHasRightScroll = sumWidthRef.current > ref.current.parentElement.offsetWidth;
+
+        setHasRightScroll(newHasRightScroll);
     }, []);
 
-    React.useEffect(() => {
-        const newHasRightScroll = sumWidthRef.current > ref.current.parentElement.offsetWidth;
-        if (newHasRightScroll !== hasRightScroll) {
-            setHasRightScroll(newHasRightScroll);
-        }
-    });
-
-    const onArrowCLick = () => {
+    const onArrowCLick = React.useCallback(() => {
         const scroller = ref.current;
         if (scroller) {
             scroller.scrollTo({
@@ -249,7 +271,7 @@ function Main() {
                 behavior: "smooth",
             });
         }
-    };
+    }, []);
 
     return (
         <main className="main">
@@ -389,9 +411,8 @@ function Main() {
                             ))}
                         </ul>
                     </div>
-                    {hasRightScroll && (
-                        <div className="section__arrow" onClick={onArrowCLick}></div>
-                    )}
+
+                    <RightScroll onArrowCLick={onArrowCLick} />
                 </div>
             </section>
         </main>
@@ -403,7 +424,9 @@ setTimeout(() => {
     root.render(
         <>
             <Header />
-            <Main />
+            <RightScrollProvider>
+                <Main />
+            </RightScrollProvider>
         </>
     );
 }, 100);

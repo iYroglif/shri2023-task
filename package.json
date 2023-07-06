@@ -17,6 +17,7 @@
     "@babel/cli": "^7.22.6",
     "@babel/core": "^7.22.6",
     "babel-preset-react-app": "^10.0.1",
+    "compression-webpack-plugin": "^10.0.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
     "html-webpack-plugin": "^5.5.3",

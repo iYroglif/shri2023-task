@@ -69,7 +69,7 @@ function Event(props) {
         });
       };
     }
-  });
+  }, [onSize]);
   return /*#__PURE__*/React.createElement("li", {
     ref: ref,
     className: "event" + (props.slim ? " event_slim" : "")
@@ -196,33 +196,51 @@ for (var i = 0; i < 6; ++i) {
   TABS.all.items = TABS.all.items.concat(TABS.all.items);
 }
 var TABS_KEYS = Object.keys(TABS);
+var hasRightScrollContext = React.createContext();
+var setHasRightScrollContext = React.createContext();
+function RightScrollProvider(_ref) {
+  var children = _ref.children;
+  var _React$useState5 = React.useState(true),
+    _React$useState6 = (0, _slicedToArray2["default"])(_React$useState5, 2),
+    hasRightScroll = _React$useState6[0],
+    setHasRightScroll = _React$useState6[1];
+  return /*#__PURE__*/React.createElement(setHasRightScrollContext.Provider, {
+    value: setHasRightScroll
+  }, /*#__PURE__*/React.createElement(hasRightScrollContext.Provider, {
+    value: hasRightScroll
+  }, children));
+}
+function RightScroll(_ref2) {
+  var onArrowCLick = _ref2.onArrowCLick;
+  var hasRightScroll = React.useContext(hasRightScrollContext);
+  if (!hasRightScroll) {
+    return null;
+  }
+  return /*#__PURE__*/React.createElement("div", {
+    className: "section__arrow",
+    onClick: onArrowCLick
+  });
+}
 function Main() {
   var ref = React.useRef();
   var sumWidthRef = React.useRef(0);
-  var _React$useState5 = React.useState(function () {
+  var setHasRightScroll = React.useContext(setHasRightScrollContext);
+  var _React$useState7 = React.useState(function () {
       return new URLSearchParams(location.search).get("tab") || "all";
     }),
-    _React$useState6 = (0, _slicedToArray2["default"])(_React$useState5, 2),
-    activeTab = _React$useState6[0],
-    setActiveTab = _React$useState6[1];
-  var _React$useState7 = React.useState(false),
     _React$useState8 = (0, _slicedToArray2["default"])(_React$useState7, 2),
-    hasRightScroll = _React$useState8[0],
-    setHasRightScroll = _React$useState8[1];
+    activeTab = _React$useState8[0],
+    setActiveTab = _React$useState8[1];
   var onSelectInput = function onSelectInput(event) {
     setActiveTab(event.target.value);
   };
-  var onSize = React.useCallback(function (_ref) {
-    var width = _ref.width;
+  var onSize = React.useCallback(function (_ref3) {
+    var width = _ref3.width;
     sumWidthRef.current += width;
-  }, []);
-  React.useEffect(function () {
     var newHasRightScroll = sumWidthRef.current > ref.current.parentElement.offsetWidth;
-    if (newHasRightScroll !== hasRightScroll) {
-      setHasRightScroll(newHasRightScroll);
-    }
-  });
-  var onArrowCLick = function onArrowCLick() {
+    setHasRightScroll(newHasRightScroll);
+  }, []);
+  var onArrowCLick = React.useCallback(function () {
     var scroller = ref.current;
     if (scroller) {
       scroller.scrollTo({
@@ -230,7 +248,7 @@ function Main() {
         behavior: "smooth"
       });
     }
-  };
+  }, []);
   return /*#__PURE__*/React.createElement("main", {
     className: "main"
   }, /*#__PURE__*/React.createElement("section", {
@@ -364,12 +382,11 @@ function Main() {
     }, item, {
       onSize: onSize
     }));
-  }))), hasRightScroll && /*#__PURE__*/React.createElement("div", {
-    className: "section__arrow",
-    onClick: onArrowCLick
+  }))), /*#__PURE__*/React.createElement(RightScroll, {
+    onArrowCLick: onArrowCLick
   }))));
 }
 setTimeout(function () {
   var root = ReactDOM.createRoot(document.getElementById("app"));
-  root.render( /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Header, null), /*#__PURE__*/React.createElement(Main, null)));
+  root.render( /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Header, null), /*#__PURE__*/React.createElement(RightScrollProvider, null, /*#__PURE__*/React.createElement(Main, null))));
 }, 100);
