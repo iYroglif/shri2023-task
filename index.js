@@ -1,6 +1,11 @@
 import "./reset.css";
 import "./styles.css";
 
+const HasRightScrollContext = React.createContext();
+const SetHasRightScrollContext = React.createContext();
+const ActiveTabContext = React.createContext();
+const SetActiveTabContext = React.createContext();
+
 function Header() {
     let [expanded, setExpanded] = React.useState(false);
     let [toggled, setToggled] = React.useState(false);
@@ -55,19 +60,23 @@ function Header() {
 function Event(props) {
     const ref = React.useRef();
 
-    const { onSize } = props;
+    const { tabKey, onSize } = props;
+
+    const activeTab = React.useContext(ActiveTabContext);
 
     React.useEffect(() => {
         const width = ref.current.offsetWidth;
         const height = ref.current.offsetHeight;
         if (onSize) {
-            onSize({ width, height });
+            if (tabKey && tabKey === activeTab) {
+                onSize({ width, height });
+            }
 
             return () => {
                 onSize({ width: -width, height: -height });
             };
         }
-    }, [onSize]);
+    }, [activeTab, onSize, tabKey]);
 
     return (
         <li ref={ref} className={"event" + (props.slim ? " event_slim" : "")}>
@@ -218,23 +227,20 @@ for (let i = 0; i < 6; ++i) {
 }
 const TABS_KEYS = Object.keys(TABS);
 
-const hasRightScrollContext = React.createContext();
-const setHasRightScrollContext = React.createContext();
-
 function RightScrollProvider({ children }) {
     const [hasRightScroll, setHasRightScroll] = React.useState(true);
 
     return (
-        <setHasRightScrollContext.Provider value={setHasRightScroll}>
-            <hasRightScrollContext.Provider value={hasRightScroll}>
+        <SetHasRightScrollContext.Provider value={setHasRightScroll}>
+            <HasRightScrollContext.Provider value={hasRightScroll}>
                 {children}
-            </hasRightScrollContext.Provider>
-        </setHasRightScrollContext.Provider>
+            </HasRightScrollContext.Provider>
+        </SetHasRightScrollContext.Provider>
     );
 }
 
 function RightScroll({ onArrowCLick }) {
-    const hasRightScroll = React.useContext(hasRightScrollContext);
+    const hasRightScroll = React.useContext(HasRightScrollContext);
 
     if (!hasRightScroll) {
         return null;
@@ -243,25 +249,78 @@ function RightScroll({ onArrowCLick }) {
     return <div className="section__arrow" onClick={onArrowCLick}></div>;
 }
 
-function Main() {
-    const ref = React.useRef();
-    const sumWidthRef = React.useRef(0);
-    const setHasRightScroll = React.useContext(setHasRightScrollContext);
+function ActiveTabProvider({ children }) {
     const [activeTab, setActiveTab] = React.useState(
         () => new URLSearchParams(location.search).get("tab") || "all"
     );
+
+    return (
+        <SetActiveTabContext.Provider value={setActiveTab}>
+            <ActiveTabContext.Provider value={activeTab}>{children}</ActiveTabContext.Provider>
+        </SetActiveTabContext.Provider>
+    );
+}
+
+function TabPanel({ tabKey, forwardRef, children }) {
+    const activeTab = React.useContext(ActiveTabContext);
+
+    return (
+        <div
+            ref={(e) => {
+                if (tabKey === activeTab) {
+                    forwardRef.current = e;
+                }
+            }}
+            role="tabpanel"
+            className={"section__panel" + (tabKey === activeTab ? "" : " section__panel_hidden")}
+            aria-hidden={tabKey === activeTab ? "false" : "true"}
+            id={`panel_${tabKey}`}
+            aria-labelledby={`tab_${tabKey}`}
+        >
+            <ul className="section__panel-list">{children}</ul>
+        </div>
+    );
+}
+
+function SectionTab({ tabKey, children }) {
+    const activeTab = React.useContext(ActiveTabContext);
+    const setActiveTab = React.useContext(SetActiveTabContext);
+
+    return (
+        <li
+            role="tab"
+            aria-selected={tabKey === activeTab ? "true" : "false"}
+            tabIndex={tabKey === activeTab ? "0" : undefined}
+            className={"section__tab" + (tabKey === activeTab ? " section__tab_active" : "")}
+            id={`tab_${tabKey}`}
+            aria-controls={`panel_${tabKey}`}
+            onClick={() => setActiveTab(tabKey)}
+        >
+            {children}
+        </li>
+    );
+}
+
+function Main() {
+    const ref = React.useRef();
+    const sumWidthRef = React.useRef(0);
+    const setHasRightScroll = React.useContext(SetHasRightScrollContext);
+    const setActiveTab = React.useContext(SetActiveTabContext);
 
     const onSelectInput = (event) => {
         setActiveTab(event.target.value);
     };
 
-    const onSize = React.useCallback(({ width }) => {
-        sumWidthRef.current += width;
+    const onSize = React.useCallback(
+        ({ width }) => {
+            sumWidthRef.current += width;
 
-        const newHasRightScroll = sumWidthRef.current > ref.current.parentElement.offsetWidth;
+            const newHasRightScroll = sumWidthRef.current > ref.current.parentElement.offsetWidth;
 
-        setHasRightScroll(newHasRightScroll);
-    }, []);
+            setHasRightScroll(newHasRightScroll);
+        },
+        [setHasRightScroll]
+    );
 
     const onArrowCLick = React.useCallback(() => {
         const scroller = ref.current;
@@ -377,40 +436,21 @@ function Main() {
 
                     <ul role="tablist" className="section__tabs">
                         {TABS_KEYS.map((key) => (
-                            <li
-                                key={key}
-                                role="tab"
-                                aria-selected={key === activeTab ? "true" : "false"}
-                                tabIndex={key === activeTab ? "0" : undefined}
-                                className={
-                                    "section__tab" +
-                                    (key === activeTab ? " section__tab_active" : "")
-                                }
-                                id={`tab_${key}`}
-                                aria-controls={`panel_${key}`}
-                                onClick={() => setActiveTab(key)}
-                            >
+                            <SectionTab key={key} tabKey={key}>
                                 {TABS[key].title}
-                            </li>
+                            </SectionTab>
                         ))}
                     </ul>
                 </div>
 
                 <div className="section__panel-wrapper">
-                    <div
-                        ref={ref}
-                        role="tabpanel"
-                        className="section__panel"
-                        aria-hidden="false"
-                        id={`panel_${activeTab}`}
-                        aria-labelledby={`tab_${activeTab}`}
-                    >
-                        <ul className="section__panel-list">
-                            {TABS[activeTab].items.map((item, index) => (
-                                <Event key={index} {...item} onSize={onSize} />
+                    {TABS_KEYS.map((key) => (
+                        <TabPanel key={key} tabKey={key} forwardRef={ref}>
+                            {TABS[key].items.map((item, index) => (
+                                <Event key={index} tabKey={key} {...item} onSize={onSize} />
                             ))}
-                        </ul>
-                    </div>
+                        </TabPanel>
+                    ))}
 
                     <RightScroll onArrowCLick={onArrowCLick} />
                 </div>
@@ -425,7 +465,9 @@ setTimeout(() => {
         <>
             <Header />
             <RightScrollProvider>
-                <Main />
+                <ActiveTabProvider>
+                    <Main />
+                </ActiveTabProvider>
             </RightScrollProvider>
         </>
     );
