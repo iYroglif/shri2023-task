@@ -288,7 +288,6 @@ var SectionTab = function SectionTab(_ref6) {
   }, children);
 };
 var Main = function Main() {
-  console.log("main rerender");
   var ref = React.useRef();
   var sumWidthRef = React.useRef(0);
   var setHasRightScroll = React.useContext(SetHasRightScrollContext);

@@ -311,7 +311,6 @@ const SectionTab = ({ tabKey, children }) => {
 };
 
 const Main = () => {
-    console.log("main rerender");
     const ref = React.useRef();
     const sumWidthRef = React.useRef(0);
     const setHasRightScroll = React.useContext(SetHasRightScrollContext);
