@@ -6,7 +6,7 @@ const SetHasRightScrollContext = React.createContext();
 const ActiveTabContext = React.createContext();
 const SetActiveTabContext = React.createContext();
 
-function Header() {
+const Header = () => {
     let [expanded, setExpanded] = React.useState(false);
     let [toggled, setToggled] = React.useState(false);
 
@@ -55,9 +55,17 @@ function Header() {
             </ul>
         </header>
     );
-}
+};
 
-function Event(props) {
+const EventSubtitle = ({ subtitle }) => {
+    if (!subtitle) {
+        return null;
+    }
+
+    return <span className="event__subtitle">{subtitle}</span>;
+};
+
+const Event = (props) => {
     const ref = React.useRef();
 
     const { tabKey, onSize } = props;
@@ -87,11 +95,12 @@ function Event(props) {
                     aria-label={props.iconLabel}
                 ></span>
                 <h4 className="event__title">{props.title}</h4>
-                {props.subtitle && <span className="event__subtitle">{props.subtitle}</span>}
+
+                <EventSubtitle subtitle={props.subtitle} />
             </button>
         </li>
     );
-}
+};
 
 const TABS = {
     all: {
@@ -227,7 +236,7 @@ for (let i = 0; i < 6; ++i) {
 }
 const TABS_KEYS = Object.keys(TABS);
 
-function RightScrollProvider({ children }) {
+const RightScrollProvider = ({ children }) => {
     const [hasRightScroll, setHasRightScroll] = React.useState(true);
 
     return (
@@ -237,9 +246,9 @@ function RightScrollProvider({ children }) {
             </HasRightScrollContext.Provider>
         </SetHasRightScrollContext.Provider>
     );
-}
+};
 
-function RightScroll({ onArrowCLick }) {
+const RightScroll = ({ onArrowCLick }) => {
     const hasRightScroll = React.useContext(HasRightScrollContext);
 
     if (!hasRightScroll) {
@@ -247,9 +256,9 @@ function RightScroll({ onArrowCLick }) {
     }
 
     return <div className="section__arrow" onClick={onArrowCLick}></div>;
-}
+};
 
-function ActiveTabProvider({ children }) {
+const ActiveTabProvider = ({ children }) => {
     const [activeTab, setActiveTab] = React.useState(
         () => new URLSearchParams(location.search).get("tab") || "all"
     );
@@ -259,9 +268,9 @@ function ActiveTabProvider({ children }) {
             <ActiveTabContext.Provider value={activeTab}>{children}</ActiveTabContext.Provider>
         </SetActiveTabContext.Provider>
     );
-}
+};
 
-function TabPanel({ tabKey, forwardRef, children }) {
+const TabPanel = ({ tabKey, forwardRef, children }) => {
     const activeTab = React.useContext(ActiveTabContext);
 
     return (
@@ -280,9 +289,9 @@ function TabPanel({ tabKey, forwardRef, children }) {
             <ul className="section__panel-list">{children}</ul>
         </div>
     );
-}
+};
 
-function SectionTab({ tabKey, children }) {
+const SectionTab = ({ tabKey, children }) => {
     const activeTab = React.useContext(ActiveTabContext);
     const setActiveTab = React.useContext(SetActiveTabContext);
 
@@ -299,9 +308,10 @@ function SectionTab({ tabKey, children }) {
             {children}
         </li>
     );
-}
+};
 
-function Main() {
+const Main = () => {
+    console.log("main rerender");
     const ref = React.useRef();
     const sumWidthRef = React.useRef(0);
     const setHasRightScroll = React.useContext(SetHasRightScrollContext);
@@ -457,7 +467,7 @@ function Main() {
             </section>
         </main>
     );
-}
+};
 
 setTimeout(() => {
     const root = ReactDOM.createRoot(document.getElementById("app"));

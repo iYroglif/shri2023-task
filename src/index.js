@@ -8,7 +8,7 @@ var HasRightScrollContext = React.createContext();
 var SetHasRightScrollContext = React.createContext();
 var ActiveTabContext = React.createContext();
 var SetActiveTabContext = React.createContext();
-function Header() {
+var Header = function Header() {
   var _React$useState = React.useState(false),
     _React$useState2 = (0, _slicedToArray2["default"])(_React$useState, 2),
     expanded = _React$useState2[0],
@@ -54,8 +54,17 @@ function Header() {
     className: "header__link",
     href: "/scripts"
   }, "\u0421\u0446\u0435\u043D\u0430\u0440\u0438\u0438"))));
-}
-function Event(props) {
+};
+var EventSubtitle = function EventSubtitle(_ref) {
+  var subtitle = _ref.subtitle;
+  if (!subtitle) {
+    return null;
+  }
+  return /*#__PURE__*/React.createElement("span", {
+    className: "event__subtitle"
+  }, subtitle);
+};
+var Event = function Event(props) {
   var ref = React.useRef();
   var tabKey = props.tabKey,
     onSize = props.onSize;
@@ -89,10 +98,10 @@ function Event(props) {
     "aria-label": props.iconLabel
   }), /*#__PURE__*/React.createElement("h4", {
     className: "event__title"
-  }, props.title), props.subtitle && /*#__PURE__*/React.createElement("span", {
-    className: "event__subtitle"
-  }, props.subtitle)));
-}
+  }, props.title), /*#__PURE__*/React.createElement(EventSubtitle, {
+    subtitle: props.subtitle
+  })));
+};
 var TABS = {
   all: {
     title: "Все",
@@ -204,8 +213,8 @@ for (var i = 0; i < 6; ++i) {
   TABS.all.items = TABS.all.items.concat(TABS.all.items);
 }
 var TABS_KEYS = Object.keys(TABS);
-function RightScrollProvider(_ref) {
-  var children = _ref.children;
+var RightScrollProvider = function RightScrollProvider(_ref2) {
+  var children = _ref2.children;
   var _React$useState5 = React.useState(true),
     _React$useState6 = (0, _slicedToArray2["default"])(_React$useState5, 2),
     hasRightScroll = _React$useState6[0],
@@ -215,9 +224,9 @@ function RightScrollProvider(_ref) {
   }, /*#__PURE__*/React.createElement(HasRightScrollContext.Provider, {
     value: hasRightScroll
   }, children));
-}
-function RightScroll(_ref2) {
-  var onArrowCLick = _ref2.onArrowCLick;
+};
+var RightScroll = function RightScroll(_ref3) {
+  var onArrowCLick = _ref3.onArrowCLick;
   var hasRightScroll = React.useContext(HasRightScrollContext);
   if (!hasRightScroll) {
     return null;
@@ -226,9 +235,9 @@ function RightScroll(_ref2) {
     className: "section__arrow",
     onClick: onArrowCLick
   });
-}
-function ActiveTabProvider(_ref3) {
-  var children = _ref3.children;
+};
+var ActiveTabProvider = function ActiveTabProvider(_ref4) {
+  var children = _ref4.children;
   var _React$useState7 = React.useState(function () {
       return new URLSearchParams(location.search).get("tab") || "all";
     }),
@@ -240,11 +249,11 @@ function ActiveTabProvider(_ref3) {
   }, /*#__PURE__*/React.createElement(ActiveTabContext.Provider, {
     value: activeTab
   }, children));
-}
-function TabPanel(_ref4) {
-  var tabKey = _ref4.tabKey,
-    forwardRef = _ref4.forwardRef,
-    children = _ref4.children;
+};
+var TabPanel = function TabPanel(_ref5) {
+  var tabKey = _ref5.tabKey,
+    forwardRef = _ref5.forwardRef,
+    children = _ref5.children;
   var activeTab = React.useContext(ActiveTabContext);
   return /*#__PURE__*/React.createElement("div", {
     ref: function ref(e) {
@@ -260,10 +269,10 @@ function TabPanel(_ref4) {
   }, /*#__PURE__*/React.createElement("ul", {
     className: "section__panel-list"
   }, children));
-}
-function SectionTab(_ref5) {
-  var tabKey = _ref5.tabKey,
-    children = _ref5.children;
+};
+var SectionTab = function SectionTab(_ref6) {
+  var tabKey = _ref6.tabKey,
+    children = _ref6.children;
   var activeTab = React.useContext(ActiveTabContext);
   var setActiveTab = React.useContext(SetActiveTabContext);
   return /*#__PURE__*/React.createElement("li", {
@@ -277,8 +286,9 @@ function SectionTab(_ref5) {
       return setActiveTab(tabKey);
     }
   }, children);
-}
-function Main() {
+};
+var Main = function Main() {
+  console.log("main rerender");
   var ref = React.useRef();
   var sumWidthRef = React.useRef(0);
   var setHasRightScroll = React.useContext(SetHasRightScrollContext);
@@ -286,8 +296,8 @@ function Main() {
   var onSelectInput = function onSelectInput(event) {
     setActiveTab(event.target.value);
   };
-  var onSize = React.useCallback(function (_ref6) {
-    var width = _ref6.width;
+  var onSize = React.useCallback(function (_ref7) {
+    var width = _ref7.width;
     sumWidthRef.current += width;
     var newHasRightScroll = sumWidthRef.current > ref.current.parentElement.offsetWidth;
     setHasRightScroll(newHasRightScroll);
@@ -427,7 +437,7 @@ function Main() {
   }), /*#__PURE__*/React.createElement(RightScroll, {
     onArrowCLick: onArrowCLick
   }))));
-}
+};
 setTimeout(function () {
   var root = ReactDOM.createRoot(document.getElementById("app"));
   root.render( /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Header, null), /*#__PURE__*/React.createElement(RightScrollProvider, null, /*#__PURE__*/React.createElement(ActiveTabProvider, null, /*#__PURE__*/React.createElement(Main, null)))));
