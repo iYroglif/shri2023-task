@@ -437,7 +437,5 @@ var Main = function Main() {
     onArrowCLick: onArrowCLick
   }))));
 };
-setTimeout(function () {
-  var root = ReactDOM.createRoot(document.getElementById("app"));
-  root.render( /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Header, null), /*#__PURE__*/React.createElement(RightScrollProvider, null, /*#__PURE__*/React.createElement(ActiveTabProvider, null, /*#__PURE__*/React.createElement(Main, null)))));
-}, 100);
+var root = ReactDOM.createRoot(document.getElementById("app"));
+root.render( /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(Header, null), /*#__PURE__*/React.createElement(RightScrollProvider, null, /*#__PURE__*/React.createElement(ActiveTabProvider, null, /*#__PURE__*/React.createElement(Main, null)))));
