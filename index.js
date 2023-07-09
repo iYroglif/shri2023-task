@@ -468,14 +468,16 @@ const Main = () => {
     );
 };
 
-const root = ReactDOM.createRoot(document.getElementById("app"));
-root.render(
-    <>
-        <Header />
-        <RightScrollProvider>
-            <ActiveTabProvider>
-                <Main />
-            </ActiveTabProvider>
-        </RightScrollProvider>
-    </>
-);
+setTimeout(() => {
+    const root = ReactDOM.createRoot(document.getElementById("app"));
+    root.render(
+        <>
+            <Header />
+            <RightScrollProvider>
+                <ActiveTabProvider>
+                    <Main />
+                </ActiveTabProvider>
+            </RightScrollProvider>
+        </>
+    );
+}, 100);
